@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Portfólio Nickolas Madeiro
 
 Portfólio profissional de Nickolas Madeiro - Desenvolvedor Full Stack Sênior com 8+ anos de experiência.
@@ -61,3 +62,6 @@ Este projeto é privado e pessoal.
 - Email: paulomadeirodigital@gmail.com
 - LinkedIn: [nickolas-madeiro](https://www.linkedin.com/in/nickolas-madeiro/)
 - Instagram: [@nickolas_madeiro](https://www.instagram.com/nickolas_madeiro)
+=======
+# nickolas-madeiro-portfolio
+>>>>>>> 62f088843e0c29f9710496599084d52db45b0333
