@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const recipientEmail = process.env.CONTACT_EMAIL || "paulomadeirodigital@gmail.com";
+    const DEFAULT_CONTACT_EMAIL = "paulomadeirodigital@gmail.com";
+    const recipientEmail = process.env.CONTACT_EMAIL || DEFAULT_CONTACT_EMAIL;
 
     const emailContent = `
 Nova mensagem do formulário de contato do portfólio:
@@ -64,8 +65,10 @@ Enviado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Fortaleza"
       );
     }
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "paulomadeirodigital@gmail.com";
+    
     const { data, error } = await resend.emails.send({
-      from: "Portfolio Contact <onboarding@resend.dev>",
+      from: `Portfolio Contact <${fromEmail}>`,
       to: recipientEmail,
       replyTo: email,
       subject: `[${contactType}] Nova mensagem de contato: ${name}`,
