@@ -38,11 +38,11 @@ function buildContextPrompt(): string {
     .join("\n");
 
   const educationSummary = educationEntries
-    .map((e) => `- ${e.degree} em ${e.field} pela ${e.institution} (${e.period})`)
+    .map((e) => `- ${e.degree} pela ${e.institution} (${e.period})`)
     .join("\n");
 
   const achievementsSummary = achievementEntries
-    .map((a) => `- ${a.title} (${a.year}): ${a.description}`)
+    .map((a) => `- ${a.title}${a.date ? ` (${a.date})` : ""}: ${a.description}`)
     .join("\n");
 
   return `Você é um assistente virtual que ajuda visitantes a conhecerem melhor Nickolas Madeiro, um desenvolvedor de software full-stack sênior.

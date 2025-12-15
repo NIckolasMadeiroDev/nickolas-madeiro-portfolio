@@ -458,7 +458,7 @@ export function Chatbot() {
                   disabled={isLoading || isListening}
                 />
                 <button
-                  onClick={handleSend}
+                  onClick={() => handleSend()}
                   disabled={!input.trim() || isLoading || isListening}
                   className="rounded-lg bg-primary px-4 py-2 text-white transition-opacity disabled:opacity-50 hover:bg-primary-hover disabled:hover:opacity-50"
                   aria-label={t.sections.chatbot.sendButton}
