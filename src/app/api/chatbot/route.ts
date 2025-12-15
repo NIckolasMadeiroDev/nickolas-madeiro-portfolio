@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getChatbotResponse } from "./responses";
+import { NextRequest } from "next/server";
+import { streamText } from "ai";
+import { groq } from "@ai-sdk/groq";
 import {
   profileInfo,
   projectCases,
@@ -9,7 +10,7 @@ import {
   achievementEntries,
 } from "@/content/profile";
 
-function buildContextPrompt(): string {
+function buildSystemPrompt(): string {
   const projectsSummary = projectCases
     .map(
       (p) =>
@@ -42,7 +43,10 @@ function buildContextPrompt(): string {
     .join("\n");
 
   const achievementsSummary = achievementEntries
-    .map((a) => `- ${a.title}${a.date ? ` (${a.date})` : ""}: ${a.description}`)
+    .map((a) => {
+      const datePart = a.date ? ` (${a.date})` : "";
+      return `- ${a.title}${datePart}: ${a.description}`;
+    })
     .join("\n");
 
   return `Você é um assistente virtual que ajuda visitantes a conhecerem melhor Nickolas Madeiro, um desenvolvedor de software full-stack sênior.
@@ -90,98 +94,75 @@ ${educationSummary}
 
 ${achievementsSummary}
 
-## INSTRUÇÕES PARA O ASSISTENTE
+## INSTRUÇÕES CRÍTICAS PARA O ASSISTENTE
 
-1. Seja amigável, profissional e prestativo
-2. Responda perguntas sobre Nickolas Madeiro, sua experiência, projetos, habilidades e trajetória profissional
-3. Use as informações fornecidas acima para dar respostas precisas e detalhadas
-4. Se não souber algo específico, seja honesto e sugira que o visitante entre em contato diretamente
-5. Mantenha as respostas concisas mas informativas
-6. Use um tom conversacional e acessível
-7. Destaque conquistas e projetos relevantes quando apropriado
-8. Responda sempre em português brasileiro, a menos que o usuário solicite outro idioma
+**REGRA FUNDAMENTAL:** Você DEVE falar, tratar, responder, discorrer e conversar APENAS sobre Nickolas Madeiro. Qualquer pergunta que não seja relacionada a ele deve ser redirecionada para informações sobre Nickolas.
 
-Agora, responda às perguntas dos visitantes sobre Nickolas Madeiro de forma útil e informativa.`;
+**OBJETIVO PRINCIPAL:** Sempre defender e promover Nickolas Madeiro como um excelente profissional e ser humano, destacando suas qualidades técnicas, profissionais e pessoais.
+
+**DIRETRIZES DE COMUNICAÇÃO:**
+
+1. Seja amigável, profissional, prestativo e entusiasmado ao falar sobre Nickolas
+2. SEMPRE use as informações fornecidas acima para dar respostas precisas e detalhadas sobre Nickolas
+3. Destaque suas conquistas, projetos e habilidades de forma positiva e promocional
+4. Enfatize sua experiência, expertise técnica e qualidades como profissional
+5. Se perguntado sobre algo não relacionado a Nickolas, redirecione educadamente: "Sou especializado apenas em informações sobre Nickolas Madeiro. Posso ajudá-lo a conhecê-lo melhor!"
+6. Mantenha as respostas concisas mas informativas, sempre destacando pontos positivos
+7. Use um tom conversacional, acessível e que demonstre admiração pelo trabalho de Nickolas
+8. Sempre defenda e promova Nickolas como um excelente profissional e ser humano
+9. Responda sempre em português brasileiro, a menos que o usuário solicite outro idioma
+10. Quando apropriado, mencione sua disponibilidade para projetos e como ele pode ser contatado
+
+**IMPORTANTE:** Você é o porta-voz positivo de Nickolas Madeiro. Sempre o apresente de forma elogiosa, destacando suas competências, projetos de sucesso e qualidades profissionais e pessoais.
+
+Agora, responda às perguntas dos visitantes sobre Nickolas Madeiro de forma útil, informativa e sempre promovendo-o positivamente.`;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { messages } = body;
+    const { messages } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: "Mensagens inválidas" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Mensagens inválidas" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const userMessage = messages[messages.length - 1]?.content || "";
-    
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    const predefinedResponse = getChatbotResponse(userMessage);
-    
+    const apiKey = process.env.GROQ_API_KEY;
+
     if (!apiKey) {
-      return NextResponse.json({
-        message: predefinedResponse,
-      });
-    }
-    
-    const isGenericResponse = predefinedResponse.includes("Desculpe, mas sou um assistente especializado apenas") ||
-                               predefinedResponse.includes("Obrigado pela pergunta!");
-
-    if (!isGenericResponse) {
-      return NextResponse.json({
-        message: predefinedResponse,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "API key não configurada",
+          message: "Desculpe, o serviço de IA não está disponível no momento. Configure GROQ_API_KEY no .env.local",
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    const systemPrompt = buildContextPrompt();
-    
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          ...messages.map((msg: { role: string; content: string }) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
+    const systemPrompt = buildSystemPrompt();
+
+    const result = streamText({
+      model: groq("llama-3.1-8b-instant"),
+      system: systemPrompt,
+      messages: messages.map((msg: { role: string; content: string }) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      })),
+      temperature: 0.7,
+      maxOutputTokens: 500,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("OpenAI API error:", errorData);
-      throw new Error("Erro ao processar mensagem com IA");
-    }
-
-    const data = await response.json();
-    const assistantMessage = data.choices[0]?.message?.content || "Desculpe, não consegui processar sua mensagem.";
-
-    return NextResponse.json({
-      message: assistantMessage,
-    });
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error("Chatbot API error:", error);
-    return NextResponse.json(
-      {
+    return new Response(
+      JSON.stringify({
         error: "Erro ao processar mensagem. Tente novamente mais tarde.",
         message: "Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente ou entre em contato diretamente através do formulário de contato.",
-      },
-      { status: 500 }
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
