@@ -1,0 +1,19 @@
+{
+  "name": "Nickolas Madeiro - Portfólio",
+  "short_name": "Nickolas Madeiro",
+  "description": "Portfólio técnico de Nickolas Madeiro - Desenvolvedor Full Stack Sênior",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#2563EB",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
