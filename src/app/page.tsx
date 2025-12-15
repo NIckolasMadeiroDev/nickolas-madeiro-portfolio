@@ -4,6 +4,7 @@ import { ExperienceList } from "@/components/experience/ExperienceList";
 import { Hero } from "@/components/home/Hero";
 import { PageSection } from "@/components/layout/PageSection";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { ExpertiseList } from "@/components/stack/ExpertiseList";
@@ -122,6 +123,7 @@ export default function Home() {
           />
         </PageSection>
       </main>
+      <SiteFooter />
       <WhatsAppButton phoneNumber="5585988523560" />
       <Chatbot />
       <AccessibilityPanel />

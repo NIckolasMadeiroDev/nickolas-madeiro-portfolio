@@ -420,5 +420,10 @@ export interface Translations {
     print: string;
     downloadResume: string;
   };
+  footer: {
+    copyright: string;
+    rights: string;
+    poweredBy: string;
+  };
 }
 

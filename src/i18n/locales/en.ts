@@ -670,5 +670,10 @@ export const en: Translations = {
     print: "Print",
     downloadResume: "Download Resume",
   },
+  footer: {
+    copyright: "Nickolas Madeiro. All rights reserved.",
+    rights: "All rights reserved",
+    poweredBy: "Developed by",
+  },
 };
 

@@ -670,5 +670,10 @@ export const es: Translations = {
     print: "Imprimir",
     downloadResume: "Descargar Currículum",
   },
+  footer: {
+    copyright: "Nickolas Madeiro. Todos los derechos reservados.",
+    rights: "Todos los derechos reservados",
+    poweredBy: "Desarrollado por",
+  },
 };
 
