@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useChatbot } from "@/components/chatbot/ChatbotContext";
 
 interface WhatsAppButtonProps {
   readonly phoneNumber: string;
@@ -9,6 +10,7 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { isOpen: isChatbotOpen } = useChatbot();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,7 +29,7 @@ export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || isChatbotOpen) return null;
 
   return (
     <motion.button
