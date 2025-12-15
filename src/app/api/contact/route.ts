@@ -3,6 +3,9 @@ import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+const DEFAULT_CONTACT_EMAIL = process.env.CONTACT_EMAIL || "paulomadeirodigital@gmail.com";
+const DEFAULT_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "paulomadeirodigital@gmail.com";
+
 interface ContactRequestBody {
   name: string;
   email: string;
@@ -38,8 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const DEFAULT_CONTACT_EMAIL = "paulomadeirodigital@gmail.com";
-    const recipientEmail = process.env.CONTACT_EMAIL || DEFAULT_CONTACT_EMAIL;
+    const recipientEmail = DEFAULT_CONTACT_EMAIL;
 
     const emailContent = `
 Nova mensagem do formulário de contato do portfólio:
@@ -58,14 +60,17 @@ Enviado em: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Fortaleza"
     `.trim();
 
     if (!resend) {
-      console.error("Resend API key not configured");
+      console.error("RESEND_API_KEY não configurada. Configure a variável de ambiente na Vercel.");
       return NextResponse.json(
-        { error: "Serviço de e-mail não configurado. Por favor, entre em contato diretamente." },
+        { 
+          error: "Serviço de e-mail não configurado. Por favor, entre em contato diretamente.",
+          details: "RESEND_API_KEY não está configurada. Configure em Settings > Environment Variables na Vercel."
+        },
         { status: 503 }
       );
     }
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "paulomadeirodigital@gmail.com";
+    const fromEmail = DEFAULT_FROM_EMAIL;
     
     const { data, error } = await resend.emails.send({
       from: `Portfolio Contact <${fromEmail}>`,
